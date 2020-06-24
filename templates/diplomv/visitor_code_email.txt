@@ -1,0 +1,8 @@
+Здравствуйте, {{ user.first_name }}!
+
+Вы были зарегистрированы в системе attendance.
+
+Код подтверждения: {{ user.validate_code }}
+
+С уважением,
+Команда attendance

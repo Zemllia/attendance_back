@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('email', 'password', 'first_name', 'last_name', 'identifier', 'avatar', 'uuid')
         search_fields = ['pk', 'events']
 
-    def save(self, **kwargs):
+    """def save(self, **kwargs):
         assert not hasattr(self, 'save_object'), (
                 'Serializer `%s.%s` has old-style version 2 `.save_object()` '
                 'that is no longer compatible with REST framework 3. '
@@ -69,7 +69,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         utils.send_mail_to_user(subject, template, context, settings.SERVICE_EMAIL, self.instance.email)
 
-        return self.instance
+        return self.instance"""
 
 
 class UserValidationSerializer(serializers.Serializer):

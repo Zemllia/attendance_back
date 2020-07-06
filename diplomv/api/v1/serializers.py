@@ -122,6 +122,10 @@ class UserSerializer(serializers.ModelSerializer):
         return self.instance"""
 
 
+class GetUserByTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=255, required=True)
+
+
 class UserChangeInfoSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255, required=True)
     last_name = serializers.CharField(max_length=255, required=True)

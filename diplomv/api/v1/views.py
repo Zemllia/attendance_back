@@ -25,7 +25,7 @@ from rest_framework.views import APIView
 from diplomv import utils, settings
 from diplomv.api.v1.serializers import UserSerializer, EventSerializer, \
     UserChangeInfoSerializer, UserChangePasswordSendValidationSerializer, UserChangePasswordSerializer, \
-    UserChangePasswordValidateSerializer, RegisterToEventSerializer, CustomAuthTokenSerializer
+    UserChangePasswordValidateSerializer, RegisterToEventSerializer, CustomAuthTokenSerializer, GetUserByTokenSerializer
 from diplomv.models import *
 
 
@@ -114,7 +114,8 @@ class UserViewSet(DiplomvViewSetMixin,
         'user_change_password_send_validation': UserChangePasswordSendValidationSerializer,
         'user_change_password_validate': UserChangePasswordValidateSerializer,
         'user_change_password': UserChangePasswordSerializer,
-        'register_to_event': RegisterToEventSerializer
+        'register_to_event': RegisterToEventSerializer,
+        'get_user_by_token': GetUserByTokenSerializer
     }
     queryset = User.objects.all()
     permission_classes = ()
@@ -128,6 +129,22 @@ class UserViewSet(DiplomvViewSetMixin,
         except Exception as e:
             return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['put'], name='Update user info')
+    def get_user_by_token(self, request):
+        try:
+            token = request.data['token']
+        except Exception as e:
+            return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(auth_token=token)
+        except Exception as e:
+            print(e)
+            return Response({'status': 'error', 'message': 'no such user'})
+        return Response({'email': user.email, 'firs_name': user.first_name, 'last_name': user.last_name,
+                         'identifier': user.identifier, 'uuid': user.uuid}, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['POST'], name='Update user info')
     def register_to_event(self, request):

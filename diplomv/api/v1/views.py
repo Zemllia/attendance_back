@@ -166,7 +166,7 @@ class UserViewSet(DiplomvViewSetMixin,
         lat2 = (decimal.Decimal(event.latitude))
         coordinates1 = (lat1, lon1)
         coordinates2 = (lat2, lon2)
-        distance = geopy.distance.vincenty(coordinates1, coordinates2).meters
+        distance = geopy.distance.geodesic(coordinates1, coordinates2)
         if distance > event.registrationRadius:
             return Response({'status': 'error', 'message': 'no event with given id'}, status=status.HTTP_409_CONFLICT)
 

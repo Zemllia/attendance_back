@@ -179,6 +179,7 @@ class UserViewSet(DiplomvViewSetMixin,
 
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'], name='Get user events')
     def get_user_events(self, request):
         token = request.data['event_id']
         is_finished = request.data['is_finished']

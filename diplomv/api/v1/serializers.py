@@ -140,7 +140,6 @@ class RegisterToEventSerializer(serializers.Serializer):
 
 
 class GetUserEvents(serializers.Serializer):
-    token = serializers.CharField(max_length=255, required=True)
     is_finished = serializers.BooleanField(required=True)
 
 

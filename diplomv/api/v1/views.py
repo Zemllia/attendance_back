@@ -181,13 +181,40 @@ class UserViewSet(DiplomvViewSetMixin,
 
     @action(detail=False, methods=['post'], name='Get user events')
     def get_user_events(self, request):
-        token = request.data['token']
         is_finished = request.data['is_finished']
 
-        events = User.objects.get(auth_token=token).events
-        print(events)
+        events = User.objects.get(pk=request.user.pk).events.all()
+        final_events = []
+        for event in events:
+            visitors = []
+            users = User.objects.all()
+            for user in users:
+                if event in user.events.all():
+                    visitors.append({'full_name': user.full_name, 'identifier': user.identifier})
+            if is_finished:
+                if event.date <= datetime.datetime.now(timezone.utc):
+                    final_events.append(
+                        {'pk': event.pk, 'name': event.name, 'creator': {
+                            'full_name': event.creator.full_name,
+                            'identifier': event.creator.identifier,
+                        },
+                         'event_description': event.event_description,
+                         'date': event.date, 'start_time': event.startTime, 'finish_time': event.finishTime,
+                         'visitors': visitors
+                         })
+            else:
+                if event.date > datetime.datetime.now(timezone.utc):
+                    final_events.append(
+                        {'pk': event.pk, 'name': event.name, 'creator': {
+                            'full_name': event.creator.full_name,
+                            'identifier': event.creator.identifier,
+                        },
+                         'event_description': event.event_description,
+                         'date': event.date, 'start_time': event.startTime, 'finish_time': event.finishTime,
+                         'visitors': visitors
+                         })
 
-        return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        return Response({'status': 'success', 'events': final_events}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], name='Update user password')
     def user_change_password_send_validation(self, request):

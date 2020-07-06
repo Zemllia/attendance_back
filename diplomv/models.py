@@ -85,7 +85,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def full_name(self):
-        return '{} {} {}'.format(self.first_name, self.middle_name if self.middle_name else '', self.last_name)
+        return '{} {}'.format(self.first_name, self.last_name)
 
 
 """def email_user(self, subject, message, from_email=None, **kwargs):

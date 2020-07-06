@@ -271,6 +271,7 @@ class UserViewSet(DiplomvViewSetMixin,
                         {'pk': event.pk, 'name': event.name, 'creator': {
                             'full_name': event.creator.full_name,
                             'identifier': event.creator.identifier,
+                            'avatar': event.creator.avatar.url
                         },
                          'event_description': event.event_description,
                          'date': event.date, 'start_time': event.startTime, 'finish_time': event.finishTime,
@@ -373,6 +374,7 @@ class EventViewSet(DiplomvViewSetMixin,
         final_events = {'pk': event.pk, 'name': event.name, 'creator': {
                 'full_name': event.creator.full_name,
                 'identifier': event.creator.identifier,
+                'avatar': event.creator.avatar.url
             },
              'event_description': event.event_description,
              'date': event.date, 'start_time': event.startTime, 'finish_time': event.finishTime,

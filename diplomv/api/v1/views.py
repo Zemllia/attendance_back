@@ -359,6 +359,7 @@ class EventViewSet(DiplomvViewSetMixin,
         try:
             event = Event.objects.get(request.data['event_id'])
         except Exception as e:
+            print(e)
             return Response({'status': 'error', 'message': 'No event with given id'}, status=status.HTTP_400_BAD_REQUEST)
 
         visitors = []

@@ -181,7 +181,7 @@ class UserViewSet(DiplomvViewSetMixin,
 
     @action(detail=False, methods=['post'], name='Get user events')
     def get_user_events(self, request):
-        token = request.data['event_id']
+        token = request.data['token']
         is_finished = request.data['is_finished']
 
         events = User.objects.get(auth_token=token).events

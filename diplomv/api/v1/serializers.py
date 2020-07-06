@@ -1,7 +1,44 @@
-from rest_framework import serializers
+import datetime
+
+from django.contrib.auth import authenticate
+from rest_framework import serializers, status, exceptions
+from rest_framework.response import Response
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from django.utils.translation import gettext_lazy as _
 
 from diplomv import utils, settings
 from diplomv.models import User, Event
+
+class CustomAuthTokenSerializer(AuthTokenSerializer):
+    username = serializers.CharField(label=_("Username"))
+    password = serializers.CharField(
+        label=_("Password"),
+        style={'input_type': 'password'},
+        trim_whitespace=False
+    )
+    uuid = serializers.CharField(label=_("UUID"))
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if username and password:
+            user = authenticate(request=self.context.get('request'),
+                                username=username, password=password)
+
+            # The authenticate call simply returns None for is_active=False
+            # users. (Assuming the default ModelBackend authentication
+            # backend.)
+            if not user:
+                msg = _('Unable to log in with provided credentials.')
+                raise serializers.ValidationError(msg, code='authorization')
+        else:
+            msg = _('Must include "username" and "password".')
+            raise serializers.ValidationError(msg, code='authorization')
+
+        attrs['user'] = user
+        return attrs
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,7 +49,16 @@ class UserSerializer(serializers.ModelSerializer):
         search_fields = ['pk', 'events']
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        print(validated_data)
+        try:
+            is_uuid_exists = User.objects.get(uuid=validated_data['uuid'])
+            raise exceptions.NotAuthenticated('Cant register multiply users in one device')
+        except Exception as e:
+            print(e)
+            user = User.objects.create_user(**validated_data)
+            user.changeDeviceDelay = datetime.date.today()
+            user.changeUserInfoDelay = datetime.date.today()
+            user.save()
         return user
 
     """def save(self, **kwargs):

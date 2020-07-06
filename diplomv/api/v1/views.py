@@ -1,18 +1,31 @@
 import decimal
+import datetime
+
 import geopy.distance
 
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from rest_framework import viewsets, mixins, status, filters
+from rest_framework import viewsets, mixins, status, filters, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_auth.views import LoginView
+from rest_framework.authtoken import views
+from rest_framework.authtoken.models import Token
 from rest_framework.settings import api_settings as drf_settings
+from rest_framework.views import APIView
+from rest_framework import parsers, renderers
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework.compat import coreapi, coreschema
+from rest_framework.response import Response
+from rest_framework.schemas import ManualSchema
+from rest_framework.views import APIView
 
 from diplomv import utils, settings
 from diplomv.api.v1.serializers import UserSerializer, EventSerializer, \
     UserChangeInfoSerializer, UserChangePasswordSendValidationSerializer, UserChangePasswordSerializer, \
-    UserChangePasswordValidateSerializer, RegisterToEventSerializer
+    UserChangePasswordValidateSerializer, RegisterToEventSerializer, CustomAuthTokenSerializer
 from diplomv.models import *
 
 
@@ -26,6 +39,63 @@ class DiplomvViewSetMixin(object):
         return self.serializer_classes.get(self.action, self.serializer_classes.get('default', self.serializer_class))
     def get_queryset(self):
         return self.querysets.get(self.action, self.querysets.get('default', self.queryset))
+
+
+class UserCodeLoginView(APIView):
+    throttle_classes = ()
+    permission_classes = ()
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
+    renderer_classes = (renderers.JSONRenderer,)
+    serializer_class = AuthTokenSerializer
+    if coreapi is not None and coreschema is not None:
+        schema = ManualSchema(
+            fields=[
+                coreapi.Field(
+                    name="username",
+                    required=True,
+                    location='form',
+                    schema=coreschema.String(
+                        title="Username",
+                        description="Valid username for authentication",
+                    ),
+                ),
+                coreapi.Field(
+                    name="password",
+                    required=True,
+                    location='form',
+                    schema=coreschema.String(
+                        title="Password",
+                        description="Valid password for authentication",
+                    ),
+                ),
+                coreapi.Field(
+                    name="UUID",
+                    required=True,
+                    location='form',
+                    schema=coreschema.String(
+                        title="UUID",
+                        description="Valid UUID of device",
+                    ),
+                ),
+            ],
+            encoding="application/json",
+        )
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data,
+                                           context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        if request.data['UUID'] != user.uuid:
+            print(datetime.date.today() - datetime.timedelta(days=7))
+            if user.changeDeviceDelay > datetime.date.today() - datetime.timedelta(days=7):
+                return Response({'status': 'error', 'message': 'Cant change device'})
+            else:
+                user.uuid = request.data['UUID']
+                user.changeDeviceDelay = datetime.date.today()
+                user.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
 
 
 class UserViewSet(DiplomvViewSetMixin,

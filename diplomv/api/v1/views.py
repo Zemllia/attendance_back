@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings as drf_settings
 
 from diplomv import utils, settings
-from diplomv.api.v1.serializers import UserSerializer, EventSerializer, UserValidationSerializer, \
+from diplomv.api.v1.serializers import UserSerializer, EventSerializer, \
     UserChangeInfoSerializer, UserChangePasswordSendValidationSerializer, UserChangePasswordSerializer, \
     UserChangePasswordValidateSerializer, RegisterToEventSerializer
 from diplomv.models import *

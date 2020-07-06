@@ -130,7 +130,7 @@ class UserViewSet(DiplomvViewSetMixin,
             return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], name='Update user info')
+    @action(detail=False, methods=['post'], name='Update user info')
     def get_user_by_token(self, request):
         try:
             token = request.data['token']
@@ -142,8 +142,11 @@ class UserViewSet(DiplomvViewSetMixin,
         except Exception as e:
             print(e)
             return Response({'status': 'error', 'message': 'no such user'})
-        return Response({'email': user.email, 'firs_name': user.first_name, 'last_name': user.last_name,
-                         'identifier': user.identifier, 'uuid': user.uuid}, status=status.HTTP_200_OK)
+        user_avatar = None
+        if user.avatar != '':
+            user_avatar = user.avatar
+        return Response({'pk': user.pk, 'email': user.email, 'firs_name': user.first_name, 'last_name': user.last_name,
+                         'identifier': user.identifier, 'avatar': user_avatar, 'uuid': user.uuid}, status=status.HTTP_200_OK)
 
 
     @action(detail=False, methods=['POST'], name='Update user info')

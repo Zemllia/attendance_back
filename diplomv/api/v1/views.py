@@ -357,7 +357,7 @@ class EventViewSet(DiplomvViewSetMixin,
     @action(detail=False, methods=['POST'], name='Update user info')
     def get_event_by_id(self, request):
         try:
-            event = Event.objects.get(request.data['event_pk'])
+            event = Event.objects.get(request.data['event_id'])
         except:
             return Response({'status': 'error', 'message': 'No event with given id'}, status=status.HTTP_400_BAD_REQUEST)
 

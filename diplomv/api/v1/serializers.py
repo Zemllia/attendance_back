@@ -45,7 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'first_name', 'last_name', 'identifier', 'avatar', 'uuid')
+        fields = ('email', 'password', 'first_name', 'last_name', 'identifier', 'uuid')
         search_fields = ['pk', 'events']
 
     def create(self, validated_data):
@@ -61,7 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
         return user
 
-    """def save(self, **kwargs):
+    def save(self, **kwargs):
         assert not hasattr(self, 'save_object'), (
                 'Serializer `%s.%s` has old-style version 2 `.save_object()` '
                 'that is no longer compatible with REST framework 3. '
@@ -109,20 +109,14 @@ class UserSerializer(serializers.ModelSerializer):
                 '`create()` did not return an object instance.'
             )
 
-        print("------------------------------------------")
-        subject = 'Подверждение регистрации'
-        template = 'diplomv/visitor_code_email.txt'
-        context = {
-            'user': self.instance
-        }
-        utils.generate_validation_code(self.instance)
-
-        utils.send_mail_to_user(subject, template, context, settings.SERVICE_EMAIL, self.instance.email)
-
-        return self.instance"""
+        return self.instance
 
 
 class GetUserByTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=255, required=True)
+
+
+class GetUserAvatarByTokenSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=255, required=True)
 
 
@@ -218,4 +212,8 @@ class EventSerializer(serializers.ModelSerializer):
 
 class GetUsersInEventSerializer(serializers.Serializer):
     event_id = serializers.IntegerField(required=True)
+
+
+class UpdateUserPhotoSerializer(serializers.Serializer):
+    avatar = serializers.ImageField()
 

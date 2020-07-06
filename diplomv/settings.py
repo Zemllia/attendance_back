@@ -140,6 +140,8 @@ USE_TZ = True
 
 STATIC_ROOT = '{}/static/'.format(BASE_DIR)
 STATIC_URL = '/static/'
+MEDIA_ROOT = '{}/media'.format(BASE_DIR)
+MEDIA_URL = '/media/'
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.mail.ru'

@@ -6,6 +6,7 @@ import geopy.distance
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.http import FileResponse, HttpResponse
 from rest_framework import viewsets, mixins, status, filters, parsers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -26,7 +27,7 @@ from diplomv import utils, settings
 from diplomv.api.v1.serializers import UserSerializer, EventSerializer, \
     UserChangeInfoSerializer, UserChangePasswordSendValidationSerializer, UserChangePasswordSerializer, \
     UserChangePasswordValidateSerializer, RegisterToEventSerializer, CustomAuthTokenSerializer, \
-    GetUserByTokenSerializer, GetUserEvents
+    GetUserByTokenSerializer, GetUserEvents, UpdateUserPhotoSerializer, GetUserAvatarByTokenSerializer
 from diplomv.models import *
 
 
@@ -117,7 +118,9 @@ class UserViewSet(DiplomvViewSetMixin,
         'user_change_password': UserChangePasswordSerializer,
         'register_to_event': RegisterToEventSerializer,
         'get_user_by_token': GetUserByTokenSerializer,
-        'get_user_events': GetUserEvents
+        'get_user_events': GetUserEvents,
+        'upload_avatar': UpdateUserPhotoSerializer,
+        'get_user_avatar_by_token': GetUserAvatarByTokenSerializer
     }
     queryset = User.objects.all()
     permission_classes = ()
@@ -144,12 +147,29 @@ class UserViewSet(DiplomvViewSetMixin,
         except Exception as e:
             print(e)
             return Response({'status': 'error', 'message': 'no such user'})
-        user_avatar = None
-        if user.avatar != '':
-            user_avatar = user.avatar
         return Response({'pk': user.pk, 'email': user.email, 'firs_name': user.first_name, 'last_name': user.last_name,
-                         'identifier': user.identifier, 'avatar': user_avatar, 'uuid': user.uuid}, status=status.HTTP_200_OK)
+                         'identifier': user.identifier, 'uuid': user.uuid}, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'], name='Update user info')
+    def get_user_avatar_by_token(self, request):
+        try:
+            token = request.data['token']
+        except Exception as e:
+            return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(auth_token=token)
+        except Exception as e:
+            print(e)
+            return Response({'status': 'error', 'message': 'no such user'})
+        return Response({'status': 'success', 'message': '{}'.format(user.avatar.url)})
+
+    @action(detail=False, methods=['POST'], name='Update avatar')
+    def upload_avatar(self, request):
+        print(request.data)
+        request.user.avatar = request.data['avatar']
+        request.user.save()
+        return Response({'status': 'success'}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], name='Update user info')
     def register_to_event(self, request):
@@ -190,13 +210,14 @@ class UserViewSet(DiplomvViewSetMixin,
             users = User.objects.all()
             for user in users:
                 if event in user.events.all():
-                    visitors.append({'full_name': user.full_name, 'identifier': user.identifier})
+                    visitors.append({'full_name': user.full_name, 'identifier': user.identifier, 'avatar': user.avatar.url})
             if is_finished:
                 if event.date <= datetime.datetime.now(timezone.utc):
                     final_events.append(
                         {'pk': event.pk, 'name': event.name, 'creator': {
                             'full_name': event.creator.full_name,
                             'identifier': event.creator.identifier,
+                            'avatar': event.creator.avatar.url
                         },
                          'event_description': event.event_description,
                          'date': event.date, 'start_time': event.startTime, 'finish_time': event.finishTime,

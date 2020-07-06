@@ -14,9 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 import diplomv.api.v1.urls
 
 urlpatterns = [
     path('api/v1/', include(diplomv.api.v1.urls.api_urlpatterns))
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -27,7 +27,8 @@ from diplomv import utils, settings
 from diplomv.api.v1.serializers import UserSerializer, EventSerializer, \
     UserChangeInfoSerializer, UserChangePasswordSendValidationSerializer, UserChangePasswordSerializer, \
     UserChangePasswordValidateSerializer, RegisterToEventSerializer, CustomAuthTokenSerializer, \
-    GetUserByTokenSerializer, GetUserEvents, UpdateUserPhotoSerializer, GetUserAvatarByTokenSerializer
+    GetUserByTokenSerializer, GetUserEvents, UpdateUserPhotoSerializer, GetUserAvatarByTokenSerializer, \
+    DeleteMyEventSerializer, GetUsersInEventSerializer
 from diplomv.models import *
 
 
@@ -120,7 +121,8 @@ class UserViewSet(DiplomvViewSetMixin,
         'get_user_by_token': GetUserByTokenSerializer,
         'get_user_events': GetUserEvents,
         'upload_avatar': UpdateUserPhotoSerializer,
-        'get_user_avatar_by_token': GetUserAvatarByTokenSerializer
+        'get_user_avatar_by_token': GetUserAvatarByTokenSerializer,
+        'delete_my_event': DeleteMyEventSerializer
     }
     queryset = User.objects.all()
     permission_classes = ()
@@ -163,6 +165,46 @@ class UserViewSet(DiplomvViewSetMixin,
             print(e)
             return Response({'status': 'error', 'message': 'no such user'})
         return Response({'status': 'success', 'message': '{}'.format(user.avatar.url)})
+
+    @action(detail=False, methods=['get'], name='Update avatar')
+    def get_my_events(self, request):
+        final_events = []
+        my_events = request.user.my_events
+        for event in my_events:
+            visitors = []
+            users = User.objects.all()
+            for user in users:
+                if event in user.events.all():
+                    visitors.append({'pk': user.pk, 'full_name': user.full_name, 'identifier': user.identifier,
+                                     'avatar': user.avatar.url})
+            final_events.append(
+                {'pk': event.pk, 'name': event.name, 'creator': {
+                    'full_name': event.creator.full_name,
+                    'identifier': event.creator.identifier,
+                    'avatar': event.creator.avatar.url
+                },
+                 'event_description': event.event_description,
+                 'date': event.date, 'start_time': event.startTime, 'finish_time': event.finishTime,
+                 'visitors': visitors
+                 })
+
+        return Response({'status': 'success', 'events': final_events}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'], name='Update avatar')
+    def delete_my_event(self, request):
+        try:
+            event = Event.objects.get(request.data['event_pk'])
+        except:
+            return Response({'status': 'error', 'message': 'No event with given pk'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if event in request.user.my_events.all():
+            request.user.my_events.remove(event)
+            request.user.save()
+        else:
+            return Response({'status': 'error', 'message': 'Its not your event'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return Response({'status': 'success'}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'], name='Update avatar')
     def upload_avatar(self, request):
@@ -297,8 +339,8 @@ class UserViewSet(DiplomvViewSetMixin,
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
 
 
-class EventViewSet(mixins.ListModelMixin,
-                   mixins.UpdateModelMixin,
+class EventViewSet(DiplomvViewSetMixin,
+                   mixins.ListModelMixin,
                    mixins.CreateModelMixin,
                    viewsets.GenericViewSet):
     """search_fields = ['email']
@@ -308,5 +350,32 @@ class EventViewSet(mixins.ListModelMixin,
 
     serializer_class = EventSerializer
     queryset = Event.objects.all()
+    serializer_classes = {
+        'get_event_by_id': GetUsersInEventSerializer
+    }
 
+    @action(detail=False, methods=['POST'], name='Update user info')
+    def get_event_by_id(self, request):
+        try:
+            event = Event.objects.get(request.data['event_pk'])
+        except:
+            return Response({'status': 'error', 'message': 'No event with given id'}, status=status.HTTP_400_BAD_REQUEST)
 
+        visitors = []
+
+        users = User.objects.all()
+        for user in users:
+            if event in user.events.all():
+                visitors.append({'pk': user.pk, 'full_name': user.full_name, 'identifier': user.identifier,
+                                 'avatar': user.avatar.url})
+
+        final_events = {'pk': event.pk, 'name': event.name, 'creator': {
+                'full_name': event.creator.full_name,
+                'identifier': event.creator.identifier,
+            },
+             'event_description': event.event_description,
+             'date': event.date, 'start_time': event.startTime, 'finish_time': event.finishTime,
+             'visitors': visitors
+            }
+
+        return Response({'status': 'success', 'events': final_events}, status=status.HTTP_200_OK)

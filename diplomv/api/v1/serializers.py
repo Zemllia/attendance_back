@@ -207,6 +207,9 @@ class EventSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         self.instance.creator = user
         self.instance.save()
+        user.my_events.add(self.instance)
+        user.events.add(self.instance)
+        user.save()
         return self.instance
 
 
@@ -216,4 +219,8 @@ class GetUsersInEventSerializer(serializers.Serializer):
 
 class UpdateUserPhotoSerializer(serializers.Serializer):
     avatar = serializers.ImageField()
+
+
+class DeleteMyEventSerializer(serializers.Serializer):
+    event_pk = serializers.IntegerField(required=True)
 

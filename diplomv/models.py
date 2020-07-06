@@ -53,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     identifier = models.CharField('Идентификатор', max_length=255)
     avatar = models.ImageField(upload_to='diplomv/user_avatars/', null=True, blank=True, verbose_name='Фото', default='/diplomv/user_avatars/default_avatar.png')
     uuid = models.CharField('UUID', max_length=255)
+    my_events = models.ManyToManyField('Event', related_name='my_events', verbose_name='События пользователя', null=True)
     events = models.ManyToManyField('Event', related_name='events', verbose_name='События пользователя', null=True)
     changeUserInfoDelay = models.DateField('Дата последнего изменения профиля', null=True)
     changeDeviceDelay = models.DateField('Дата смены залогиненого устройства', null=True)

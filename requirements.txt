@@ -15,5 +15,5 @@ django-coreapi
 django-smtp-ssl
 django-filter
 django-url-filter
-geopy
+geopy==2.0.0
 psycopg2

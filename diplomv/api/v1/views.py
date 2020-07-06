@@ -25,7 +25,8 @@ from rest_framework.views import APIView
 from diplomv import utils, settings
 from diplomv.api.v1.serializers import UserSerializer, EventSerializer, \
     UserChangeInfoSerializer, UserChangePasswordSendValidationSerializer, UserChangePasswordSerializer, \
-    UserChangePasswordValidateSerializer, RegisterToEventSerializer, CustomAuthTokenSerializer, GetUserByTokenSerializer
+    UserChangePasswordValidateSerializer, RegisterToEventSerializer, CustomAuthTokenSerializer, \
+    GetUserByTokenSerializer, GetUserEvents
 from diplomv.models import *
 
 
@@ -115,7 +116,8 @@ class UserViewSet(DiplomvViewSetMixin,
         'user_change_password_validate': UserChangePasswordValidateSerializer,
         'user_change_password': UserChangePasswordSerializer,
         'register_to_event': RegisterToEventSerializer,
-        'get_user_by_token': GetUserByTokenSerializer
+        'get_user_by_token': GetUserByTokenSerializer,
+        'get_user_events': GetUserEvents
     }
     queryset = User.objects.all()
     permission_classes = ()
@@ -174,6 +176,15 @@ class UserViewSet(DiplomvViewSetMixin,
 
         request.user.events.add(event)
         request.user.save()
+
+        return Response({'status': 'success'}, status=status.HTTP_200_OK)
+
+    def get_user_events(self, request):
+        token = request.data['event_id']
+        is_finished = request.data['is_finished']
+
+        events = User.objects.get(auth_token=token).events
+        print(events)
 
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
 

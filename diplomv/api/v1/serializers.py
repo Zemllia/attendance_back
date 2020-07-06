@@ -139,6 +139,11 @@ class RegisterToEventSerializer(serializers.Serializer):
     user_longitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=True)
 
 
+class GetUserEvents(serializers.Serializer):
+    token = serializers.CharField(max_length=255, required=True)
+    is_finished = serializers.BooleanField(required=True)
+
+
 class UserChangePasswordSendValidationSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 

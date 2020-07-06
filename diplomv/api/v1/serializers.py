@@ -11,6 +11,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('email', 'password', 'first_name', 'last_name', 'identifier', 'avatar', 'uuid')
         search_fields = ['pk', 'events']
 
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
     """def save(self, **kwargs):
         assert not hasattr(self, 'save_object'), (
                 'Serializer `%s.%s` has old-style version 2 `.save_object()` '

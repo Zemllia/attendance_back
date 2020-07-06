@@ -16,3 +16,4 @@ django-smtp-ssl
 django-filter
 django-url-filter
 geopy
+psycopg2

@@ -130,7 +130,7 @@ class UserViewSet(DiplomvViewSetMixin,
             return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'status': 'success'}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['put'], name='Update user info')
+    @action(detail=False, methods=['get'], name='Update user info')
     def get_user_by_token(self, request):
         try:
             token = request.data['token']

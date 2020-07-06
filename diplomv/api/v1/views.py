@@ -210,7 +210,7 @@ class UserViewSet(DiplomvViewSetMixin,
             users = User.objects.all()
             for user in users:
                 if event in user.events.all():
-                    visitors.append({'full_name': user.full_name, 'identifier': user.identifier, 'avatar': user.avatar.url})
+                    visitors.append({'pk': user.pk, 'full_name': user.full_name, 'identifier': user.identifier, 'avatar': user.avatar.url})
             if is_finished:
                 if event.date <= datetime.datetime.now(timezone.utc):
                     final_events.append(

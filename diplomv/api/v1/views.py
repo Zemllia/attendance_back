@@ -40,7 +40,6 @@ class UserViewSet(DiplomvViewSetMixin,
 
     serializer_class = UserSerializer
     serializer_classes = {
-        'validate_user': UserValidationSerializer,
         'update_user_info': UserChangeInfoSerializer,
         'user_change_password_send_validation': UserChangePasswordSendValidationSerializer,
         'user_change_password_validate': UserChangePasswordValidateSerializer,
@@ -49,14 +48,6 @@ class UserViewSet(DiplomvViewSetMixin,
     }
     queryset = User.objects.all()
     permission_classes = ()
-
-    @action(detail=False, methods=['post'], name='Validate user')
-    def validate_user(self, request):
-        if str(request.data['code']) == str(request.user.validate_code):
-            request.user.is_active = True
-            request.user.save()
-            return Response({'status: success'}, status=status.HTTP_200_OK)
-        return Response({'status: error'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['put'], name='Update user info')
     def update_user_info(self, request):

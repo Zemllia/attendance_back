@@ -16,7 +16,7 @@ class CustomAuthTokenSerializer(AuthTokenSerializer):
         style={'input_type': 'password'},
         trim_whitespace=False
     )
-    uuid = serializers.CharField(label=_("UUID"))
+    uuid = serializers.CharField(label=_("UUID"), required=True)
 
     def validate(self, attrs):
         username = attrs.get('username')

@@ -1,5 +1,5 @@
 djangorestframework
-Django==2.2.2
+Django==2.2.21
 django-app-settings==0.5.1
 django-braces==1.13.0
 -e git://github.com/darklow/django-suit.git@v2#egg=django_suit

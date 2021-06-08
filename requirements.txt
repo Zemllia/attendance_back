@@ -4,7 +4,7 @@ django-app-settings==0.5.1
 django-braces==1.13.0
 -e git://github.com/darklow/django-suit.git@v2#egg=django_suit
 django-jet
-Pillow==6.0.0
+Pillow==8.2.0
 pytz==2019.1
 six==1.12.0
 sqlparse==0.3.0
